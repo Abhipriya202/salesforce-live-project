@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Salesforce Validation Rules</title>
+</head>
+
+<body style="font-family: Arial; text-align:center; margin-top:50px;">
+
+  <h2>Salesforce Validation Rules Dashboard</h2>
+
+  <button onclick="login()">Login with Salesforce</button>
+  <button onclick="getRules()">Get Validation Rules</button>
+
+  <br><br>
+
+  <table border="1" cellpadding="10" style="margin:auto;">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="rulesTable">
+      <tr><td colspan="2">No data loaded</td></tr>
+    </tbody>
+  </table>
+
+<script>
+
+const CLIENT_ID =
+  "3MVG97L7PWbPq6UyVT8jaE9TYCvJvOaOLH9ppwPSt2xvTJ3LE4BGZKfkiAk_OpktGsCylGHYKZlRoZ4a49yG7";
+
+// 🔐 LOGIN
+function login() {
+  const redirectUri = "http://localhost:5000/callback";
+
+  window.location.href =
+    "https://login.salesforce.com/services/oauth2/authorize" +
+    "?response_type=code" +
+    "&client_id=" + CLIENT_ID +
+    "&redirect_uri=" + redirectUri;
+}
+
+// 📋 FETCH RULES
+async function getRules() {
+  try {
+    const res = await fetch("/rules");
+
+    if (!res.ok) {
+      throw new Error("Server error");
+    }
+
+    const data = await res.json();
+
+    if (!data || data.length === 0) {
+      document.getElementById("rulesTable").innerHTML =
+        "<tr><td colspan='2'>No rules found</td></tr>";
+      return;
+    }
+
+    let html = "";
+
+    data.forEach(r => {
+      html += `
+        <tr>
+          <td>${r.ValidationName || "N/A"}</td>
+          <td>${r.Active ? "Active" : "Inactive"}</td>
+        </tr>
+      `;
+    });
+
+    document.getElementById("rulesTable").innerHTML = html;
+
+  } catch (err) {
+    console.error(err);
+    alert("Error fetching rules. Check backend login.");
+  }
+}
+
+</script>
+
+</body>
+</html>
